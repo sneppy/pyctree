@@ -2,10 +2,12 @@
 
 /* The methods of the Tree type. */
 static PyMethodDef Tree_Methods[] = {
+	DEFINE_PY_METHOD(Tree, copy, PyCFunction, METH_NOARGS, NULL),
 	DEFINE_PY_METHOD(Tree, find, PyCFunction, METH_FASTCALL, NULL),
 	DEFINE_PY_METHOD(Tree, add, PyCFunction, METH_FASTCALL, NULL),
 	DEFINE_PY_METHOD(Tree, update, PyCFunction, METH_FASTCALL, NULL),
-	DEFINE_PY_METHOD(Tree, remove, PyCFunction, METH_FASTCALL, NULL)
+	DEFINE_PY_METHOD(Tree, remove, PyCFunction, METH_FASTCALL, NULL),
+	DEFINE_PY_METHOD(Tree, clear, PyCFunction, METH_NOARGS, NULL)
 };
 
 /* Definition of the Python sequence API for Tree. */
@@ -149,6 +151,12 @@ int Tree_contains(Tree* self, PyObject* key)
 	return tree_find(self->root, key) != NULL;
 }
 
+PyObject* Tree_copy(Tree* self)
+{
+	// TODO
+	return Py_None;
+}
+
 PyObject* Tree_find(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 {
 	if (num_args != 1)
@@ -222,6 +230,16 @@ PyObject* Tree_remove(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 		// Some error occured
 		return NULL;
 	}
+
+	return Py_None;
+}
+
+PyObject* Tree_clear(Tree* self)
+{
+	// Reset tree to initial state
+	tree_reset(self->root);
+	self->root = NULL;
+	self->num_nodes = 0;
 
 	return Py_None;
 }

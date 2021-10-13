@@ -78,3 +78,8 @@ struct binary_node* tree_insert_item(struct binary_node* root, PyObject* item);
    and sets the first argument to point to the node
    that has actually been evicted from the tree. */
 struct binary_node* tree_remove(struct binary_node** node);
+
+/* Remove all nodes of the tree, leaving the tree
+   empty. The node given must be the root of the
+   tree. */
+void tree_reset(struct binary_node* root);

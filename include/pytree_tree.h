@@ -42,6 +42,9 @@ Py_ssize_t Tree_len(Tree* self);
    one item identified by the given key. */
 int Tree_contains(Tree* self, PyObject* key);
 
+/* Returns a copy of the tree. */
+PyObject* Tree_copy(Tree* self);
+
 /* Returns the first item that matches the
    given key. */
 PyObject* Tree_find(Tree* self, PyObject* const* args, Py_ssize_t num_args);
@@ -59,6 +62,9 @@ PyObject* Tree_update(Tree* self, PyObject* const* args, Py_ssize_t num_args);
    the given key. If no such item exists, raises
    a KeyError. */
 PyObject* Tree_remove(Tree* self, PyObject* const* args, Py_ssize_t num_args);
+
+/* Remove all items from the tree. */
+PyObject* Tree_clear(Tree* self);
 
 /* Returns an iterator to iterate over the nodes
    of the tree in a sorted manner. Note that the

@@ -272,3 +272,17 @@ struct binary_node* tree_remove(struct binary_node** node)
 	// Removed last node of the tree
 	return NULL;
 }
+
+void tree_reset(struct binary_node* root)
+{
+	// We can simply iterate over the tree from
+	// left to right
+	struct binary_node* it = tree_min(root);
+	struct binary_node* next = NULL;
+
+	for (; it; it = next)
+	{
+		next = it->next;
+		binary_node_destroy(it);
+	}
+}
