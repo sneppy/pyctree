@@ -45,6 +45,9 @@ inline struct binary_node* tree_max(struct binary_node* root)
 	return root;
 }
 
+/* Returns the number of nodes in the tree. */
+size_t tree_size(struct binary_node* root);
+
 /* Returns the last node along the path given
    by the key. When an item matches the key
    it moves to the right child. */
@@ -83,3 +86,10 @@ struct binary_node* tree_remove(struct binary_node** node);
    empty. The node given must be the root of the
    tree. */
 void tree_reset(struct binary_node* root);
+
+/* Clone subtree spawning from given node. */
+struct binary_node* tree_clone_subtree(struct binary_node* src);
+
+/* Copy the structure from the source subtree
+   to the destination subtree. */
+void tree_copy_subtree(struct binary_node* dst, struct binary_node* src);

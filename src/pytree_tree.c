@@ -151,10 +151,23 @@ int Tree_contains(Tree* self, PyObject* key)
 	return tree_find(self->root, key) != NULL;
 }
 
-PyObject* Tree_copy(Tree* self)
+Tree* Tree_copy(Tree* self)
 {
-	// TODO
-	return Py_None;
+	// Spawn a new tree
+	Tree* new_tree = PyObject_New(Tree, &Tree_T);
+
+	// Clone tree structure
+	struct binary_node* new_tree_root = NULL;
+	if (self->root)
+	{
+		new_tree_root = tree_clone_subtree(self->root);
+	}
+
+	new_tree->root = new_tree_root;
+	new_tree->num_nodes = self->num_nodes;
+	assert(new_tree->num_nodes == tree_size(new_tree->root));
+
+	return new_tree;
 }
 
 PyObject* Tree_find(Tree* self, PyObject* const* args, Py_ssize_t num_args)

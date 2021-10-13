@@ -43,7 +43,7 @@ Py_ssize_t Tree_len(Tree* self);
 int Tree_contains(Tree* self, PyObject* key);
 
 /* Returns a copy of the tree. */
-PyObject* Tree_copy(Tree* self);
+Tree* Tree_copy(Tree* self);
 
 /* Returns the first item that matches the
    given key. */

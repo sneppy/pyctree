@@ -74,6 +74,40 @@ inline void binary_node_insert_right(struct binary_node* parent, struct binary_n
 	}
 }
 
+/* Sets a subtree as the left child of a
+   parent node. */
+inline void tree_set_left_subtree(struct binary_node* parent, struct binary_node* left)
+{
+	assert(parent != NULL);
+	assert(left != NULL);
+
+	// The prev node is the rightmost node of the
+	// subtree
+	struct binary_node* prev = tree_max(left);
+
+	parent->left = left;
+	parent->prev = prev;
+	left->parent = parent;
+	prev->next = parent; // Prev is always non-NULL
+}
+
+/* Sets a subtree as the right child of a
+   parent node. */
+inline void tree_set_right_subtree(struct binary_node* parent, struct binary_node* right)
+{
+	assert(parent != NULL);
+	assert(right != NULL);
+
+	// The next node is the rightmost node of the
+	// subtree
+	struct binary_node* next = tree_max(right);
+
+	parent->right = right;
+	parent->next = next;
+	right->parent = parent;
+	next->next = parent; // Next is always non-NULL
+}
+
 /* Remove a node from the tree structure. It
    assumes that the node as at most a right
    child, but never has a left child.
@@ -153,6 +187,19 @@ inline void binary_node_destroy(struct binary_node* node)
 
 	// Destroy node
 	PyMem_Free(node);
+}
+
+size_t tree_size(struct binary_node* root)
+{
+   size_t size = 1;
+
+   if (root->left)
+      size += tree_size(root->left);
+
+   if (root->right)
+      size += tree_size(root->right);
+   
+   return size;
 }
 
 struct binary_node* tree_bisect_right(struct binary_node* root, PyObject* key)
@@ -286,3 +333,29 @@ void tree_reset(struct binary_node* root)
 		binary_node_destroy(it);
 	}
 }
+
+struct binary_node* tree_clone_subtree(struct binary_node* src)
+{
+	assert(src != NULL);
+
+	// Make a shallow copy of the node
+	struct binary_node* dst = binary_node_create(src->item);
+
+	if (src->left)
+	{
+		// Clone left subtree
+		struct binary_node* left = tree_clone_subtree(src->left);
+		tree_set_left_subtree(dst, left);
+	}
+
+	if (src->right)
+	{
+		// Clone right subtree
+		struct binary_node* right = tree_clone_subtree(src->right);
+		tree_set_right_subtree(dst, right);
+	}
+
+	return dst;
+}
+
+void tree_copy_subtree(struct binary_node* dst, struct binary_node* src); // TODO
