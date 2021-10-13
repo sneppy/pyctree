@@ -1,0 +1,38 @@
+#pragma once
+
+#include "python.h"
+
+/* Color of a RB tree node. */
+enum binary_node_color
+{
+	BINARY_NODE_COLOR_BLACK,
+	BINARY_NODE_COLOR_RED
+};
+
+/* Basic implementation of a binary node type
+   which contains a Python object. The node
+   also has pointers to the previous and next
+   nodes in sorting order. */
+struct binary_node
+{
+	/* Ptr to the item inside the node. */
+	PyObject* item;
+
+	/* Ptr to parent node. */
+	struct binary_node* parent;
+
+	/* Ptr to left child. */
+	struct binary_node* left;
+
+	/* Ptr to right child. */
+	struct binary_node* right;
+
+	/* Ptr to the next child in the sequence. */
+	struct binary_node* next;
+
+	/* Ptr to the previous child in the sequence. */
+	struct binary_node* prev;
+
+	/* Color of the node. */
+	enum binary_node_color color;
+};

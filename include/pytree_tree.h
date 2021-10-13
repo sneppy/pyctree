@@ -1,0 +1,74 @@
+#pragma once
+
+#include "tree.h"
+
+/* Python type used to implement a binary tree. */
+typedef struct
+{
+	PyObject_HEAD
+
+	/* Root node. */
+	struct binary_node* root;
+
+	/* Number of nodes */
+	size_t num_nodes;
+} Tree;
+
+/* The tree python type object. */
+extern PyTypeObject Tree_T;
+
+/* The iterator type used to iterate over a binary tree. */
+typedef struct
+{
+	PyObject_HEAD
+
+	/* Node pointed by iterator. */
+	struct binary_node* node;
+
+	/* Tree this iterator belongs too. */
+	Tree* owner;
+} TreeIterator;
+
+/* The tree iterator type object. */
+extern PyTypeObject TreeIterator_T;
+
+/* Called to initialize a binary tree. */
+int Tree_init(Tree* self, PyObject* args);
+
+/* Returns the number of items in the tree. */
+Py_ssize_t Tree_len(Tree* self);
+
+/* Returns true if the tree contains at least
+   one item identified by the given key. */
+int Tree_contains(Tree* self, PyObject* key);
+
+/* Returns the first item that matches the
+   given key. */
+PyObject* Tree_find(Tree* self, PyObject* const* args, Py_ssize_t num_args);
+
+/* Insert a new item in the tree. The tree may
+   contain multiple items that match the same
+   key. */
+PyObject* Tree_add(Tree* self, PyObject* const* args, Py_ssize_t num_args);
+
+/* Insert multiple items in the tree. This
+   method accepts zero or more iterable items. */
+PyObject* Tree_update(Tree* self, PyObject* const* args, Py_ssize_t num_args);
+
+/* Remove the first item in the tree that matches
+   the given key. If no such item exists, raises
+   a KeyError. */
+PyObject* Tree_remove(Tree* self, PyObject* const* args, Py_ssize_t num_args);
+
+/* Returns an iterator to iterate over the nodes
+   of the tree in a sorted manner. Note that the
+   tree is naturally sorted so this costs nothing. */
+TreeIterator* Tree_iter(Tree* self);
+
+/* Increments the tree iterator by one and returns
+   the item it currently points to. */
+PyObject* TreeIterator_next(TreeIterator* self);
+/* x.add(                          x.difference_update(            x.isdisjoint(                   x.remove(                       x.update(
+x.clear(                        x.discard(                      x.issubset(                     x.symmetric_difference(         
+x.copy(                         x.intersection(                 x.issuperset(                   x.symmetric_difference_update(  
+x.difference(                   x.intersection_update(          x.pop(                          x.union(  */
