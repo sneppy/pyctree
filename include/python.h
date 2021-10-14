@@ -18,8 +18,23 @@
 
 /* Set TypeError for invalid number of arguments */
 #define INVALID_NUM_ARGS_ONE(func, num_args) PyErr_Format(PyExc_TypeError,\
-                                                          #func "() takes exactly one argument (%zu given)",\
+                                                          #func"() takes exactly one argument (%zu given)",\
 														  num_args)
+
+#define INVALID_NUM_ARGS_AT_LEAST(func, min, num_args) PyErr_Format(PyExc_TypeError,\
+                                                                    #func" expected at least "#min" arguments, got %zu",\
+														            num_args)
+
+#define INVALID_NUM_ARGS_AT_MOST(func, max, num_args) PyErr_Format(PyExc_TypeError,\
+                                                                   #func" expected at most "#max" arguments, got %zu",\
+														           num_args)
+
+/* Raises a deprecation warning for method. */
+#define DEPRECATED_METHOD(func) PyErr_WarnFormat(PyExc_DeprecationWarning, 1,\
+                                                 #func" has been deprecated")
+
+#define DEPRECATED_METHOD_ALT(func, alt) PyErr_WarnFormat(PyExc_DeprecationWarning, 1,\
+                                                          #func" has been deprecated, use "#alt" instead")
 
 /* Helper struct to register a new Python type. */
 struct python_type_def

@@ -3,7 +3,8 @@
 /* The methods of the Tree type. */
 static PyMethodDef Tree_Methods[] = {
 	DEFINE_PY_METHOD(Tree, copy, PyCFunction, METH_NOARGS, NULL),
-	DEFINE_PY_METHOD(Tree, find, PyCFunction, METH_FASTCALL, NULL),
+	DEFINE_PY_METHOD(Tree, get, PyCFunction, METH_FASTCALL, NULL),
+	DEFINE_PY_METHOD(Tree, find, PyCFunction, METH_FASTCALL, NULL), // Deprecated
 	DEFINE_PY_METHOD(Tree, add, PyCFunction, METH_FASTCALL, NULL),
 	DEFINE_PY_METHOD(Tree, update, PyCFunction, METH_FASTCALL, NULL),
 	DEFINE_PY_METHOD(Tree, remove, PyCFunction, METH_FASTCALL, NULL),
@@ -112,7 +113,7 @@ int Tree_init(Tree* self, PyObject* args)
 		// TODO: Better error
 		return -1;
 	}
-	
+
 	// Destroy existing tree
 	if (self->root)
 	{
@@ -175,8 +176,45 @@ Tree* Tree_copy(Tree* self)
 	return new_tree;
 }
 
+PyObject* Tree_get(Tree* self, PyObject* const* args, Py_ssize_t num_args)
+{
+	if (num_args < 1)
+	{
+		INVALID_NUM_ARGS_AT_LEAST(get, 1, num_args);
+		return NULL;
+	}
+	if (num_args > 2)
+	{
+		INVALID_NUM_ARGS_AT_MOST(get, 2, num_args);
+		return NULL;
+	}
+
+	// Find node using key
+	struct binary_node* node = tree_find(self->root, args[0]);
+	if (node)
+	{
+		// Return item found
+		return node->item;
+	}
+
+	if (num_args == 2)
+	{
+		// Return provided default value
+		return args[1];
+	}
+
+	// Return None object
+	return Py_None;
+}
+
 PyObject* Tree_find(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 {
+	if (DEPRECATED_METHOD_ALT(find, get) < 0)
+	{
+		// Warning treated as exception
+		return NULL;
+	}
+
 	if (num_args != 1)
 	{
 		INVALID_NUM_ARGS_ONE(find, num_args);
@@ -190,7 +228,7 @@ PyObject* Tree_find(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 		// Return item found
 		return node->item;
 	}
-	
+
 	// Return None object
 	return Py_None;
 }

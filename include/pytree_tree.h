@@ -46,6 +46,11 @@ int Tree_contains(Tree* self, PyObject* key);
 Tree* Tree_copy(Tree* self);
 
 /* Returns the first item that matches the
+   given key, or the default value (None by
+   default). */
+PyObject* Tree_get(Tree* self, PyObject* const* args, Py_ssize_t num_args);
+
+/* Returns the first item that matches the
    given key. */
 PyObject* Tree_find(Tree* self, PyObject* const* args, Py_ssize_t num_args);
 
