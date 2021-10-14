@@ -41,7 +41,7 @@ inline void binary_node_insert_left(struct binary_node* parent, struct binary_no
 
 	parent->left = node;
 	parent->prev = node;
-	
+
 	node->parent = parent;
 	node->next = parent;
 	node->prev = prev;
@@ -63,7 +63,7 @@ inline void binary_node_insert_right(struct binary_node* parent, struct binary_n
 
 	parent->right = node;
 	parent->next = node;
-	
+
 	node->parent = parent;
 	node->prev = parent;
 	node->next = next;
@@ -111,7 +111,7 @@ inline void tree_set_right_subtree(struct binary_node* parent, struct binary_nod
 /* Remove a node from the tree structure. It
    assumes that the node as at most a right
    child, but never has a left child.
-   
+
    Returns a pointer to the node used to replace
    the evicted node, which can be NULL if the
    node is a leaf node. */
@@ -123,7 +123,7 @@ inline struct binary_node* tree_evict_node(struct binary_node* node)
 
 	struct binary_node* parent = node->parent;
 	struct binary_node* repl = NULL;
-	
+
 	if ((repl = node->right))
 	{
 		repl->parent = parent;
@@ -135,7 +135,7 @@ inline struct binary_node* tree_evict_node(struct binary_node* node)
 	{
 		if (node->prev)
 			node->prev->next = node->next;
-		
+
 		if (node->next)
 			node->next->prev = node->prev;
 	}
@@ -198,7 +198,7 @@ size_t tree_size(struct binary_node* root)
 
    if (root->right)
       size += tree_size(root->right);
-   
+
    return size;
 }
 
@@ -315,7 +315,7 @@ struct binary_node* tree_remove(struct binary_node** node)
 	{
 		return tree_root(next);
 	}
-	
+
 	// Removed last node of the tree
 	return NULL;
 }
@@ -334,12 +334,31 @@ void tree_reset(struct binary_node* root)
 	}
 }
 
+void tree_destroy_subtree(struct binary_node* root)
+{
+	assert(root != NULL);
+
+	if (root->left)
+	{
+		tree_destroy_subtree(root->left);
+	}
+
+	if (root->right)
+	{
+		tree_destroy_subtree(root->right);
+	}
+
+	// Destroy root
+	binary_node_destroy(root);
+}
+
 struct binary_node* tree_clone_subtree(struct binary_node* src)
 {
 	assert(src != NULL);
 
 	// Make a shallow copy of the node
 	struct binary_node* dst = binary_node_create(src->item);
+	dst->color = src->color;
 
 	if (src->left)
 	{
@@ -358,4 +377,51 @@ struct binary_node* tree_clone_subtree(struct binary_node* src)
 	return dst;
 }
 
-void tree_copy_subtree(struct binary_node* dst, struct binary_node* src); // TODO
+struct binary_node* tree_copy_subtree(struct binary_node* dst, struct binary_node* src)
+{
+	assert(dst == NULL || dst->item != NULL);
+	assert(src == NULL || src->item != NULL);
+
+	if (!dst && !src)
+	{
+		// Nothing to do here
+		return NULL;
+	}
+	else if (!src)
+	{
+		// If source node is null, we need to remove dst node
+		tree_destroy_subtree(dst);
+		return NULL;
+	}
+	else if (!dst)
+	{
+		// Create entire subtree
+		return tree_clone_subtree(src);
+	}
+
+	// Both exists, just copy ref and color
+	Py_DECREF(dst->item);
+	dst->item = src->item;
+	Py_INCREF(dst->item);
+	dst->color = src->color;
+
+	// Copy left subtree
+	struct binary_node* left = tree_copy_subtree(dst->left, src->left);
+	if (left != dst->left)
+	{
+		// Set new subtree
+		assert(dst->left == NULL);
+		tree_set_left_subtree(dst, left);
+	}
+
+	struct binary_node* right = tree_copy_subtree(dst->right, src->right);
+	if (right != dst->right)
+	{
+		// Set new subtree
+		assert(dst->right == NULL);
+		tree_set_right_subtree(dst, right);
+	}
+
+	// Return existing node
+	return dst;
+}

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """ TODO """
 
 from distutils.core import setup, Extension

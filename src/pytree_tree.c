@@ -113,7 +113,11 @@ int Tree_init(Tree* self, PyObject* args)
 		return -1;
 	}
 	
-	// TODO: Destroy existing tree
+	// Destroy existing tree
+	if (self->root)
+	{
+		tree_destroy_subtree(self->root);
+	}
 
 	// Init tree
 	self->root = NULL;
@@ -121,6 +125,7 @@ int Tree_init(Tree* self, PyObject* args)
 
 	if (init_list)
 	{
+		// TODO: Support another tree as input
 		PyObject* it = PyObject_GetIter(init_list);
 		if (!it)
 		{

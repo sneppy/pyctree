@@ -87,9 +87,12 @@ struct binary_node* tree_remove(struct binary_node** node);
    tree. */
 void tree_reset(struct binary_node* root);
 
+/* Destroy all the nodes in the subtree. */
+void tree_destroy_subtree(struct binary_node* root);
+
 /* Clone subtree spawning from given node. */
 struct binary_node* tree_clone_subtree(struct binary_node* src);
 
 /* Copy the structure from the source subtree
    to the destination subtree. */
-void tree_copy_subtree(struct binary_node* dst, struct binary_node* src);
+struct binary_node* tree_copy_subtree(struct binary_node* dst, struct binary_node* src);
