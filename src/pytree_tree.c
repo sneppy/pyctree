@@ -8,6 +8,7 @@ static PyMethodDef Tree_Methods[] = {
 	DEFINE_PY_METHOD(Tree, add, PyCFunction, METH_FASTCALL, NULL),
 	DEFINE_PY_METHOD(Tree, update, PyCFunction, METH_FASTCALL, NULL),
 	DEFINE_PY_METHOD(Tree, remove, PyCFunction, METH_FASTCALL, NULL),
+	DEFINE_PY_METHOD(Tree, discard, PyCFunction, METH_FASTCALL, NULL),
 	DEFINE_PY_METHOD(Tree, clear, PyCFunction, METH_NOARGS, NULL)
 };
 
@@ -58,7 +59,7 @@ PyTypeObject TreeIterator_T = {
 /* Helper function to insert a new item in the
    tree, update the root of the tree and update
    the number of nodes. */
-static int Tree_Impl_insert(Tree* tree, PyObject* item)
+inline int Tree_Impl_insert(Tree* tree, PyObject* item)
 {
 	// Ref is acquired by tree code
 	struct binary_node* new_root = tree_insert_item(tree->root, item);
@@ -78,7 +79,7 @@ static int Tree_Impl_insert(Tree* tree, PyObject* item)
    matches the key from the tree. It destroys the
    evicted node and udpates the root of the tree and
    the number of nodes. */
-static int Tree_Impl_remove(Tree* tree, struct binary_node* node)
+inline int Tree_Impl_remove(Tree* tree, struct binary_node* node)
 {
 	// Remove from tree
 	struct binary_node* evicted = node;
@@ -299,7 +300,7 @@ PyObject* Tree_remove(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 		return NULL;
 	}
 
-	// Find and remove item from tree
+	// Find node to remove
 	struct binary_node* node = tree_find(self->root, args[0]);
 	if (!node)
 	{
@@ -309,6 +310,25 @@ PyObject* Tree_remove(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 	}
 
 	if (Tree_Impl_remove(self, node) < 0)
+	{
+		// Some error occured
+		return NULL;
+	}
+
+	return Py_None;
+}
+
+PyObject* Tree_discard(Tree* self, PyObject* const* args, Py_ssize_t num_args)
+{
+	if (num_args != 1)
+	{
+		INVALID_NUM_ARGS_ONE(remove, num_args);
+		return NULL;
+	}
+
+	// Find node to remove
+	struct binary_node* node = tree_find(self->root, args[0]);
+	if (node && Tree_Impl_remove(self, node) < 0)
 	{
 		// Some error occured
 		return NULL;

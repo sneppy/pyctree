@@ -71,6 +71,10 @@ PyObject* Tree_update(Tree* self, PyObject* const* args, Py_ssize_t num_args);
    a KeyError. */
 PyObject* Tree_remove(Tree* self, PyObject* const* args, Py_ssize_t num_args);
 
+/* Like Tree_remove, but returns None instead of
+   raising a KeyError if item does not exist. */
+PyObject* Tree_discard(Tree* self, PyObject* const* args, Py_ssize_t num_args);
+
 /* Remove all items from the tree. */
 PyObject* Tree_clear(Tree* self);
 

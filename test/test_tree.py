@@ -45,6 +45,17 @@ def test_tree():
 
 	assert len(t) == 0
 
+	t.update(range(5))
+	for i in range(5):
+		assert i in t
+		t.discard(i)
+		assert i not in t
+
+	for i in range(5):
+		t.discard(t)
+
+	assert len(t) == 0
+
 	t.update(range(10, 20))
 	u = t.copy()
 	assert len(u) == 10
