@@ -100,12 +100,12 @@ inline void tree_set_right_subtree(struct binary_node* parent, struct binary_nod
 
 	// The next node is the rightmost node of the
 	// subtree
-	struct binary_node* next = tree_max(right);
+	struct binary_node* next = tree_min(right);
 
 	parent->right = right;
 	parent->next = next;
 	right->parent = parent;
-	next->next = parent; // Next is always non-NULL
+	next->prev = parent; // Next is always non-NULL
 }
 
 /* Remove a node from the tree structure. It
@@ -119,12 +119,19 @@ inline struct binary_node* tree_evict_node(struct binary_node* node)
 {
 	// Make sure node is semi-leaf
 	assert(node != NULL);
-	assert(node->left == NULL);
+	assert(node->left == NULL || node->right == NULL);
 
 	struct binary_node* parent = node->parent;
 	struct binary_node* repl = NULL;
 
-	if ((repl = node->right))
+	if ((repl = node->left))
+	{
+		repl->parent = parent;
+		repl->next = node->next;
+		if (repl->next)
+			repl->next->prev = repl;
+	}
+	else if ((repl = node->right))
 	{
 		repl->parent = parent;
 		repl->prev = node->prev;
@@ -309,11 +316,11 @@ struct binary_node* tree_remove(struct binary_node** node)
 	// Return new root
 	if (repl)
 	{
-		return tree_root(parent);
+		return tree_root(repl);
 	}
 	else if (parent)
 	{
-		return tree_root(next);
+		return tree_root(parent);
 	}
 
 	// Removed last node of the tree
@@ -322,6 +329,8 @@ struct binary_node* tree_remove(struct binary_node** node)
 
 void tree_reset(struct binary_node* root)
 {
+	assert(root != NULL);
+
 	// We can simply iterate over the tree from
 	// left to right
 	struct binary_node* it = tree_min(root);

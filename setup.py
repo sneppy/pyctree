@@ -11,7 +11,7 @@ pytreemodule = Extension(name='pytree',
 
 # Setup PyTree package
 setup(name='pytree',
-      version='0.1.3',
+      version='0.1.4',
 	  description=__doc__,
 	  author='Andrea Mecchia',
 	  author_email='andrea.mecchia@arm.com',

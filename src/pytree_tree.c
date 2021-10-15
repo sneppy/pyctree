@@ -25,8 +25,9 @@ PyTypeObject Tree_T = {
 	.tp_itemsize  = 0,
 	.tp_flags     = Py_TPFLAGS_DEFAULT,
 
-	.tp_new  = PyType_GenericNew,
-	.tp_init = (initproc)Tree_init,
+	.tp_new     = PyType_GenericNew,
+	.tp_init    = (initproc)Tree_init,
+	.tp_dealloc = (destructor)Tree_dealloc,
 
 	.tp_members = NULL,
 	.tp_methods = Tree_Methods,
@@ -46,8 +47,9 @@ PyTypeObject TreeIterator_T = {
 	.tp_itemsize  = 0,
 	.tp_flags     = Py_TPFLAGS_DEFAULT,
 
-	.tp_new  = PyType_GenericNew,
-	.tp_init = NULL, // Not callable from Python
+	.tp_new     = PyType_GenericNew,
+	.tp_init    = NULL, // Not callable from Python
+	.tp_dealloc = (destructor)TreeIterator_dealloc,
 
 	.tp_iter     = PyObject_SelfIter,
 	.tp_iternext = (iternextfunc)TreeIterator_next
@@ -76,17 +78,8 @@ static int Tree_Impl_insert(Tree* tree, PyObject* item)
    matches the key from the tree. It destroys the
    evicted node and udpates the root of the tree and
    the number of nodes. */
-static int Tree_Impl_remove(Tree* tree, PyObject* key)
+static int Tree_Impl_remove(Tree* tree, struct binary_node* node)
 {
-	// Find and remove item from tree
-	struct binary_node* node = tree_find(tree->root, key);
-	if (!node)
-	{
-		// Raise key error
-		PyErr_SetObject(PyExc_KeyError, key);
-		return -1;
-	}
-
 	// Remove from tree
 	struct binary_node* evicted = node;
 	struct binary_node* new_root = tree_remove(&evicted);
@@ -117,7 +110,7 @@ int Tree_init(Tree* self, PyObject* args)
 	// Destroy existing tree
 	if (self->root)
 	{
-		tree_destroy_subtree(self->root);
+		tree_reset(self->root);
 	}
 
 	// Init tree
@@ -142,9 +135,23 @@ int Tree_init(Tree* self, PyObject* args)
 		{
 			Tree_Impl_insert(self, item);
 		}
+
+		if (PyErr_Occurred())
+		{
+			// Propagate error
+			return -1;
+		}
+
+		Py_DECREF(it);
 	}
 
 	return 0;
+}
+
+void Tree_dealloc(Tree* self)
+{
+	// Remove all nodes
+	Tree_clear(self);
 }
 
 Py_ssize_t Tree_len(Tree* self)
@@ -250,12 +257,15 @@ PyObject* Tree_update(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 {
 	for (Py_ssize_t idx = 0; idx < num_args; ++idx)
 	{
-		if (!PyObject_GetIter(args[idx]))
+		PyObject* it = PyObject_GetIter(args[idx]);
+		if (!it)
 		{
 			// Expect an iterable
 			PyErr_Format(PyExc_TypeError, "'%s' object is not iterable", Py_TYPE(args[idx])->tp_name);
 			return NULL;
 		}
+
+		Py_DECREF(it);
 	}
 
 	for (Py_ssize_t idx = 0; idx < num_args; ++idx)
@@ -268,6 +278,14 @@ PyObject* Tree_update(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 			// Insert item in tree
 			Tree_Impl_insert(self, item);
 		}
+
+		if (PyErr_Occurred())
+		{
+			// Propagate error
+			return NULL;
+		}
+
+		Py_DECREF(it);
 	}
 
 	return Py_None;
@@ -281,7 +299,16 @@ PyObject* Tree_remove(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 		return NULL;
 	}
 
-	if (Tree_Impl_remove(self, args[0]) < 0)
+	// Find and remove item from tree
+	struct binary_node* node = tree_find(self->root, args[0]);
+	if (!node)
+	{
+		// Raise key error
+		PyErr_SetObject(PyExc_KeyError, args[0]);
+		return NULL;
+	}
+
+	if (Tree_Impl_remove(self, node) < 0)
 	{
 		// Some error occured
 		return NULL;
@@ -293,9 +320,12 @@ PyObject* Tree_remove(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 PyObject* Tree_clear(Tree* self)
 {
 	// Reset tree to initial state
-	tree_reset(self->root);
-	self->root = NULL;
-	self->num_nodes = 0;
+	if (self->root)
+	{
+		tree_reset(self->root);
+		self->root = NULL;
+		self->num_nodes = 0;
+	}
 
 	return Py_None;
 }
@@ -306,7 +336,13 @@ TreeIterator* Tree_iter(Tree* self)
 	TreeIterator* it = PyObject_New(TreeIterator, &TreeIterator_T);
 	it->node = self->root ? tree_min(self->root) : NULL;
 	it->owner = self;
+	Py_INCREF(it->owner);
 	return it;
+}
+
+void TreeIterator_dealloc(TreeIterator* self)
+{
+	Py_XDECREF(self->owner);
 }
 
 PyObject* TreeIterator_next(TreeIterator* self)
@@ -314,6 +350,7 @@ PyObject* TreeIterator_next(TreeIterator* self)
 	if (!self->node)
 	{
 		// Stop iteration
+		PyErr_SetNone(PyExc_StopIteration);
 		return NULL;
 	}
 

@@ -35,6 +35,9 @@ extern PyTypeObject TreeIterator_T;
 /* Called to initialize a binary tree. */
 int Tree_init(Tree* self, PyObject* args);
 
+/* Remove all the nodes and destroy tree. */
+void Tree_dealloc(Tree* self);
+
 /* Returns the number of items in the tree. */
 Py_ssize_t Tree_len(Tree* self);
 
@@ -76,10 +79,9 @@ PyObject* Tree_clear(Tree* self);
    tree is naturally sorted so this costs nothing. */
 TreeIterator* Tree_iter(Tree* self);
 
+/* Deallocates the tree iterator. */
+void TreeIterator_dealloc(TreeIterator* self);
+
 /* Increments the tree iterator by one and returns
    the item it currently points to. */
 PyObject* TreeIterator_next(TreeIterator* self);
-/* x.add(                          x.difference_update(            x.isdisjoint(                   x.remove(                       x.update(
-x.clear(                        x.discard(                      x.issubset(                     x.symmetric_difference(         
-x.copy(                         x.intersection(                 x.issuperset(                   x.symmetric_difference_update(  
-x.difference(                   x.intersection_update(          x.pop(                          x.union(  */
