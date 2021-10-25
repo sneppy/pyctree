@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """ TODO """
 
-from distutils.core import setup, Extension
+from distutils.core import Extension, setup
 
 # The PyTree module definition
 pytreemodule = Extension(name='pytree',

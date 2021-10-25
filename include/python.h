@@ -16,6 +16,12 @@
 	.ml_doc   = doc\
 }
 
+/* Increment refcount and return object ref. */
+#define RETURN_NEW_REF(obj) { Py_INCREF(obj); return obj; }
+
+/* Increment refcount and return Py_None ref. */
+#define RETURN_NONE RETURN_NEW_REF(Py_None)
+
 /* Set TypeError for invalid number of arguments */
 #define INVALID_NUM_ARGS_ONE(func, num_args) PyErr_Format(PyExc_TypeError,\
                                                           #func"() takes exactly one argument (%zu given)",\

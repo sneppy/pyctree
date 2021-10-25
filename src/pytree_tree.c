@@ -29,6 +29,7 @@ PyTypeObject Tree_T = {
 	.tp_new     = PyType_GenericNew,
 	.tp_init    = (initproc)Tree_init,
 	.tp_dealloc = (destructor)Tree_dealloc,
+	.tp_str     = (reprfunc)Tree_str,
 
 	.tp_members = NULL,
 	.tp_methods = Tree_Methods,
@@ -56,12 +57,27 @@ PyTypeObject TreeIterator_T = {
 	.tp_iternext = (iternextfunc)TreeIterator_next
 };
 
+static void Tree_Impl_build_str(struct binary_node* node, size_t depth, PyObject** repr)
+{
+	// Generate tree prefix
+	PyObject* vline = PyUnicode_FromString("| ");
+	PyObject* prefix = PySequence_Repeat(vline, depth);
+
+	// Concat object string
+	*repr = PyUnicode_FromFormat("%U\n%U|>%R", *repr, prefix, node->item);
+
+	Py_DECREF(prefix);
+	Py_DECREF(vline);
+}
+
 /* Helper function to insert a new item in the
    tree, update the root of the tree and update
    the number of nodes. */
 inline int Tree_Impl_insert(Tree* tree, PyObject* item)
 {
-	// Ref is acquired by tree code
+	assert(item != NULL);
+
+	// Insert item, also acquires ref
 	struct binary_node* new_root = tree_insert_item(tree->root, item);
 	if (!new_root)
 	{
@@ -90,7 +106,7 @@ inline int Tree_Impl_remove(Tree* tree, struct binary_node* node)
 		return -1;
 	}
 
-	// Destroy evicted node
+	// Destroy evicted node, also releases ref
 	binary_node_destroy(evicted);
 
 	tree->root = new_root;
@@ -135,6 +151,7 @@ int Tree_init(Tree* self, PyObject* args)
 		while ((item = PyIter_Next(it)))
 		{
 			Tree_Impl_insert(self, item);
+			Py_DECREF(item);
 		}
 
 		if (PyErr_Occurred())
@@ -163,6 +180,17 @@ Py_ssize_t Tree_len(Tree* self)
 int Tree_contains(Tree* self, PyObject* key)
 {
 	return tree_find(self->root, key) != NULL;
+}
+
+PyObject* Tree_str(Tree* self)
+{
+	// Buidl representation string
+	PyObject* repr_tmp = PyUnicode_FromStringAndSize(NULL, 0);
+	tree_visit(self->root, (tree_visit_cb_t)Tree_Impl_build_str, (void*)&repr_tmp);
+	PyObject* repr = PyUnicode_FromFormat("{%U\n}", repr_tmp);
+	Py_DECREF(repr_tmp);
+
+	return repr;
 }
 
 Tree* Tree_copy(Tree* self)
@@ -202,17 +230,17 @@ PyObject* Tree_get(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 	if (node)
 	{
 		// Return item found
-		return node->item;
+		RETURN_NEW_REF(node->item);
 	}
 
 	if (num_args == 2)
 	{
 		// Return provided default value
-		return args[1];
+		RETURN_NEW_REF(args[1]);
 	}
 
 	// Return None object
-	return Py_None;
+	RETURN_NONE
 }
 
 PyObject* Tree_find(Tree* self, PyObject* const* args, Py_ssize_t num_args)
@@ -234,11 +262,11 @@ PyObject* Tree_find(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 	if (node)
 	{
 		// Return item found
-		return node->item;
+		RETURN_NEW_REF(node->item);
 	}
 
 	// Return None object
-	return Py_None;
+	RETURN_NONE
 }
 
 PyObject* Tree_add(Tree* self, PyObject* const* args, Py_ssize_t num_args)
@@ -251,7 +279,8 @@ PyObject* Tree_add(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 
 	// Insert item in tree
 	Tree_Impl_insert(self, args[0]);
-	return Py_None;
+
+	RETURN_NONE
 }
 
 PyObject* Tree_update(Tree* self, PyObject* const* args, Py_ssize_t num_args)
@@ -278,6 +307,7 @@ PyObject* Tree_update(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 		{
 			// Insert item in tree
 			Tree_Impl_insert(self, item);
+			Py_DECREF(item);
 		}
 
 		if (PyErr_Occurred())
@@ -289,7 +319,7 @@ PyObject* Tree_update(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 		Py_DECREF(it);
 	}
 
-	return Py_None;
+	RETURN_NONE
 }
 
 PyObject* Tree_remove(Tree* self, PyObject* const* args, Py_ssize_t num_args)
@@ -315,14 +345,14 @@ PyObject* Tree_remove(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 		return NULL;
 	}
 
-	return Py_None;
+	RETURN_NONE
 }
 
 PyObject* Tree_discard(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 {
 	if (num_args != 1)
 	{
-		INVALID_NUM_ARGS_ONE(remove, num_args);
+		INVALID_NUM_ARGS_ONE(discard, num_args);
 		return NULL;
 	}
 
@@ -334,7 +364,7 @@ PyObject* Tree_discard(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 		return NULL;
 	}
 
-	return Py_None;
+	RETURN_NONE
 }
 
 PyObject* Tree_clear(Tree* self)
@@ -347,7 +377,7 @@ PyObject* Tree_clear(Tree* self)
 		self->num_nodes = 0;
 	}
 
-	return Py_None;
+	RETURN_NONE
 }
 
 TreeIterator* Tree_iter(Tree* self)
@@ -356,13 +386,15 @@ TreeIterator* Tree_iter(Tree* self)
 	TreeIterator* it = PyObject_New(TreeIterator, &TreeIterator_T);
 	it->node = self->root ? tree_min(self->root) : NULL;
 	it->owner = self;
-	Py_INCREF(it->owner);
+	Py_INCREF(self); // Keep alive as long as iterator is alive
+
 	return it;
 }
 
 void TreeIterator_dealloc(TreeIterator* self)
 {
-	Py_XDECREF(self->owner);
+	// Release tree if not needed anymore by iterator
+	Py_DECREF(self->owner);
 }
 
 PyObject* TreeIterator_next(TreeIterator* self)
@@ -378,5 +410,5 @@ PyObject* TreeIterator_next(TreeIterator* self)
 	PyObject* item = self->node->item;
 	self->node = self->node->next;
 
-	return item;
+	RETURN_NEW_REF(item);
 }

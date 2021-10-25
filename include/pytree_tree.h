@@ -45,6 +45,9 @@ Py_ssize_t Tree_len(Tree* self);
    one item identified by the given key. */
 int Tree_contains(Tree* self, PyObject* key);
 
+/* Returns a string representation of the tree. */
+PyObject* Tree_str(Tree* self);
+
 /* Returns a copy of the tree. */
 Tree* Tree_copy(Tree* self);
 
