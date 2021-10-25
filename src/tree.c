@@ -1,5 +1,7 @@
 #include "tree.h"
 
+#define INV(dir) (1 - dir)
+
 /* Initialize the fields of a binary tree. */
 inline void binary_node_init(struct binary_node* node)
 {
@@ -21,8 +23,16 @@ inline int binary_node_black(struct binary_node* node)
 	return !binary_node_red(node);
 }
 
+/* Returns an array with pointers to the left
+   and right children. */
+inline struct binary_node** binary_node_children(struct binary_node* node)
+{
+	assert(&node->left + 1 == &node->right);
+	return &node->left;
+}
+
 /* Swap the value of two nodes. */
-inline void swap_nodes(struct binary_node* lhs, struct binary_node* rhs)
+inline void binary_node_swap(struct binary_node* lhs, struct binary_node* rhs)
 {
 	// Refs do not need to be incremented/decremented
 	PyObject* tmp = lhs->item;
@@ -74,6 +84,33 @@ inline void binary_node_insert_right(struct binary_node* parent, struct binary_n
 	}
 }
 
+/* Rotate the subtree around the pivot node in
+   the given direction (0 = left, 1 = right). */
+inline void binary_node_rotate_dir(struct binary_node* node, int dir)
+{
+	assert(dir == 0 || dir == 1);
+
+	struct binary_node* parent = node->parent;
+	struct binary_node* pivot = binary_node_children(node)[INV(dir)];
+	struct binary_node* child = binary_node_children(pivot)[dir];
+
+	node->parent = pivot;
+	binary_node_children(node)[INV(dir)] = child;
+
+	pivot->parent = parent;
+	binary_node_children(pivot)[dir] = node;
+
+	if (parent)
+	{
+		binary_node_children(parent)[parent->right == node] = pivot;
+	}
+
+	if (child)
+	{
+		child->parent = node;
+	}
+}
+
 /* Sets a subtree as the left child of a
    parent node. */
 inline void tree_set_left_subtree(struct binary_node* parent, struct binary_node* left)
@@ -108,9 +145,7 @@ inline void tree_set_right_subtree(struct binary_node* parent, struct binary_nod
 	next->prev = parent; // Next is always non-NULL
 }
 
-/* Remove a node from the tree structure. It
-   assumes that the node as at most a right
-   child, but never has a left child.
+/* Remove a node from the tree structure.
 
    Returns a pointer to the node used to replace
    the evicted node, which can be NULL if the
@@ -124,27 +159,10 @@ inline struct binary_node* tree_evict_node(struct binary_node* node)
 	struct binary_node* parent = node->parent;
 	struct binary_node* repl = NULL;
 
-	if ((repl = node->left))
+	if ((repl = node->left) || (repl = node->right))
 	{
+		// We have a replacement node
 		repl->parent = parent;
-		repl->next = node->next;
-		if (repl->next)
-			repl->next->prev = repl;
-	}
-	else if ((repl = node->right))
-	{
-		repl->parent = parent;
-		repl->prev = node->prev;
-		if (repl->prev)
-			repl->prev->next = repl;
-	}
-	else
-	{
-		if (node->prev)
-			node->prev->next = node->next;
-
-		if (node->next)
-			node->next->prev = node->prev;
 	}
 
 	if (parent)
@@ -155,6 +173,16 @@ inline struct binary_node* tree_evict_node(struct binary_node* node)
 			parent->right = repl;
 	}
 
+	if (node->prev)
+	{
+		node->prev->next = node->next;
+	}
+
+	if (node->next)
+	{
+		node->next->prev = node->prev;
+	}
+
 	return repl;
 }
 
@@ -163,10 +191,141 @@ inline struct binary_node* tree_evict_node(struct binary_node* node)
    inserted node. */
 static void tree_repair(struct binary_node* node)
 {
-	//
+	assert(node != NULL);
+	assert(node->color = BINARY_NODE_COLOR_RED);
+
+	for (;;)
+	{
+		struct binary_node* parent = node->parent;
+
+		if (!parent)
+		{
+			// Node is root, make black
+			node->color = BINARY_NODE_COLOR_BLACK;
+			return;
+		}
+		else if (binary_node_black(parent))
+		{
+			// Leave red
+			return;
+		}
+		else
+		{
+			assert(parent->parent != NULL); // Grand cannot be NULL
+			struct binary_node* grand = parent->parent;
+			struct binary_node* uncle = grand->left != parent
+									  ? grand->left
+									  : grand->right;
+
+			if (binary_node_red(uncle))
+			{
+				// We can make both parent and uncle black
+				// and repair grand
+				uncle->color = parent->color = BINARY_NODE_COLOR_BLACK;
+				grand->color = BINARY_NODE_COLOR_RED;
+				node = grand;
+			}
+			else // Uncle is black or NULL
+			{
+				int dir = grand->right == parent;
+
+				if (binary_node_children(parent)[dir] != node)
+				{
+					// Rotate to the outside and recolor
+					binary_node_rotate_dir(parent, dir);
+					parent = node;
+				}
+
+				// Rotate grand
+				binary_node_rotate_dir(grand, INV(dir));
+				parent->color = BINARY_NODE_COLOR_BLACK;
+				grand->color = BINARY_NODE_COLOR_RED;
+				return;
+			}
+		}
+	}
 }
 
-inline struct binary_node* binary_node_create(PyObject* item)
+/* Called after node removal to repair the RB
+   tree structure. It takes a pointer to the
+   node that replaced the evicted node and a
+   pointer to the parent (in case repl is
+   NULL). */
+static void tree_repair_removed(struct binary_node* repl, struct binary_node* parent)
+{
+	if (!repl && !parent)
+		return; // Nothing to do
+
+	if (binary_node_red(repl) || !parent)
+	{
+		// Make node black to rebalance
+		repl->color = BINARY_NODE_COLOR_BLACK;
+		return;
+	}
+
+	do
+	{
+		int dir = parent->right == repl;
+		struct binary_node* sibling = binary_node_children(parent)[INV(dir)];
+
+		if (binary_node_red(sibling))
+		{
+			binary_node_rotate_dir(parent, dir);
+			sibling->color = parent->color;
+			parent->color = BINARY_NODE_COLOR_RED;
+			sibling = binary_node_children(parent)[INV(dir)];
+		}
+
+		// Now sibling is surely black
+		assert(sibling && sibling->color == BINARY_NODE_COLOR_BLACK);
+		if (binary_node_black(sibling->left) && binary_node_black(sibling->right))
+		{
+			sibling->color = BINARY_NODE_COLOR_RED;
+			if (binary_node_red(parent))
+			{
+				parent->color = BINARY_NODE_COLOR_BLACK;
+				return; // Repair complete
+			}
+
+			// Up one level
+			repl = parent;
+		}
+		else
+		{
+			// At least one of the children is red
+			struct binary_node* close = binary_node_children(sibling)[dir];
+			struct binary_node* distant = binary_node_children(sibling)[INV(dir)];
+
+			if (binary_node_red(close))
+			{
+				binary_node_rotate_dir(sibling, INV(dir));
+				close->color = sibling->color;
+				sibling->color = BINARY_NODE_COLOR_RED;
+				distant = sibling;
+				sibling = close;
+			}
+
+			binary_node_rotate_dir(parent, dir);
+			sibling->color = parent->color;
+			parent->color = BINARY_NODE_COLOR_BLACK;
+			distant->color = BINARY_NODE_COLOR_BLACK;
+			return; // Repair completed
+		}
+	} while ((parent = repl->parent));
+}
+
+static void tree_visit_df_impl(struct binary_node* root, size_t depth, tree_visit_cb_t visit_cb, void* payload)
+{
+	visit_cb(root, depth, payload);
+
+	if (root->left)
+		tree_visit_df_impl(root->left, depth + 1, visit_cb, payload);
+
+	if (root->right)
+		tree_visit_df_impl(root->right, depth + 1, visit_cb, payload);
+}
+
+struct binary_node* binary_node_create(PyObject* item)
 {
 	assert(item != NULL);
 
@@ -177,19 +336,19 @@ inline struct binary_node* binary_node_create(PyObject* item)
 	// Init node
 	binary_node_init(new_node);
 
-	// Set item, increment ref count
-	new_node->item = item;
+	// Set item
 	Py_INCREF(item);
+	new_node->item = item;
 
 	return new_node;
 }
 
-inline void binary_node_destroy(struct binary_node* node)
+void binary_node_destroy(struct binary_node* node)
 {
 	assert(node != NULL);
 
-	// Decrement item ref count
-	Py_XDECREF(node->item);
+	// Release Python item
+	Py_DECREF(node->item);
 	node->item = NULL;
 
 	// Destroy node
@@ -281,36 +440,41 @@ struct binary_node* tree_insert_item(struct binary_node* root, PyObject* item)
 {
 	assert(item != NULL);
 
-	// Create new node
+	// Create new node and insert in tree
 	struct binary_node* node = binary_node_create(item);
+	struct binary_node* new_root = tree_insert(root, node);
+	if (!new_root)
+	{
+		// Destroy created node
+		binary_node_destroy(node);
+	}
 
-	// Insert node in tree and return new root
-	return tree_insert(root, node);
+	return new_root;
 }
 
 struct binary_node* tree_remove(struct binary_node** node)
 {
 	assert(node != NULL && *node != NULL);
 
-	struct binary_node* parent = (*node)->parent;
 	struct binary_node* next = (*node)->next;
+	assert(*node && next == tree_min((*node)->left));
 
 	// If node has both children
 	if ((*node)->left && (*node)->right)
 	{
 		// Swap with next
-		swap_nodes(*node, next);
-		next = *node;
-		*node = (*node)->next; // We will evict this node
+		binary_node_swap(*node, next);
+		*node = next; // We will evict this node
 	}
 
 	// Evict node from tree
+	struct binary_node* parent = (*node)->parent;
 	struct binary_node* repl = tree_evict_node(*node);
 
 	if (binary_node_black(*node))
 	{
 		// Repair tree if evicted node is black
-		// TODO
+		tree_repair_removed(repl, parent);
 	}
 
 	// Return new root
@@ -434,3 +598,16 @@ struct binary_node* tree_copy_subtree(struct binary_node* dst, struct binary_nod
 	// Return existing node
 	return dst;
 }
+
+void tree_visit_df(struct binary_node* root, tree_visit_cb_t visit_cb, void* payload)
+{
+	if (!root) return;
+	tree_visit_df_impl(root, 0, visit_cb, payload);
+}
+
+void tree_visit_bf(struct binary_node* root, tree_visit_cb_t visit_cb, void* payload)
+{
+	// TODO
+}
+
+#undef INV

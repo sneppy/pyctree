@@ -3,16 +3,32 @@
 #include "tree_types.h"
 
 /* Create a new binary tree with the given
-   Python item. Increases the ref count of
-   Python item.
-   
+   Python item. Also increases the ref count
+   of the Python item.
+
    Returns a pointer to the created node. */
 struct binary_node* binary_node_create(PyObject* item);
 
-/* Destroys a node of the tree and decrements
-   the ref count of the Python object contained
-   in the node. */
+/* Destroys a node of the tree. Also decrements
+   the ref count of the Python object owned by
+   the node. */
 void binary_node_destroy(struct binary_node* node);
+
+/* Returns the Python repr of a binary node. */
+inline PyObject* binary_node_repr(struct binary_node* node)
+{
+	// TODO: Enable debug repr
+	return PyObject_Repr(node->item);
+}
+
+/* Print the repr of the Python object owned by
+   the node. */
+inline void binary_node_print(struct binary_node* node)
+{
+	assert(node != NULL);
+	assert(node->item != NULL);
+	PyObject_Print(node->item, stdout, 0);
+}
 
 /* Returns the root of the tree the given
    node belongs to. */
@@ -60,7 +76,7 @@ struct binary_node* tree_find(struct binary_node* root, PyObject* key);
 
 /* Insert a node in the tree at the right position
    and repairs the tree if necessary.
-   
+
    Returns a pointer to the new root of the tree. */
 struct binary_node* tree_insert(struct binary_node* root, struct binary_node* node);
 
@@ -96,3 +112,19 @@ struct binary_node* tree_clone_subtree(struct binary_node* src);
 /* Copy the structure from the source subtree
    to the destination subtree. */
 struct binary_node* tree_copy_subtree(struct binary_node* dst, struct binary_node* src);
+
+/* Call the visit callback with all the nodes
+   in the tree. The visit is DF. Root may be
+   NULL. */
+void tree_visit_df(struct binary_node* root, tree_visit_cb_t visit_cb, void* payload);
+
+/* Call the visit callback with all the nodes
+   in the tree. The visit is DF. Root may be
+   NULL. */
+void tree_visit_bf(struct binary_node* root, tree_visit_cb_t visit_cb, void* payload);
+
+/* Same as tree_visit_df. */
+inline void tree_visit(struct binary_node* root, tree_visit_cb_t visit_cb, void* payload)
+{
+	tree_visit_df(root, visit_cb, payload);
+}

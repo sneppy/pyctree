@@ -1,4 +1,4 @@
-from pytest import raises
+from pytest import raises, main
 from pytree import Tree
 
 def test_tree():
@@ -67,3 +67,31 @@ def test_tree():
 
 	for i, j in zip(t, u):
 		assert i == j
+
+	del t
+
+def test_tree_stress():
+	"""  """
+
+	from random import randint
+
+	values = [randint(0, 255) for _ in range(0x1 << 12)]
+	t = Tree(values)
+	assert [*t] == sorted(values)
+
+	for x in (randint(0, 255) for _ in range(0x1 << 10)):
+		if x in t:
+			t.remove(x)
+		else:
+			with raises(KeyError):
+				t.remove(x)
+
+	for x in (randint(0, 255) for _ in range(0x1 << 12)):
+		t.discard(x)
+
+	t.update(randint(0, 255) for _ in range(0x1 << 16))
+	for x in (randint(0, 255) for _ in range(0x1 << 16)):
+		t.discard(x)
+
+if __name__ == "__main__":
+	exit(main())

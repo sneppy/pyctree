@@ -36,3 +36,9 @@ struct binary_node
 	/* Color of the node. */
 	enum binary_node_color color;
 };
+
+/* Type of the tree visit callback. */
+typedef void(*tree_visit_cb_t)(struct binary_node*, size_t, void*);
+
+/* Type of the tree read-only visit callback. */
+typedef void(*tree_const_visit_t)(struct binary_node const*, size_t, void*);
