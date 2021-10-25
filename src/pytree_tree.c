@@ -57,7 +57,7 @@ PyTypeObject TreeIterator_T = {
 	.tp_iternext = (iternextfunc)TreeIterator_next
 };
 
-static void Tree_Impl_build_str(struct binary_node* node, size_t depth, PyObject** repr)
+static void Tree_Impl_build_str(binary_node_t* node, size_t depth, PyObject** repr)
 {
 	// Generate tree prefix
 	PyObject* vline = PyUnicode_FromString("| ");
@@ -78,7 +78,7 @@ inline int Tree_Impl_insert(Tree* tree, PyObject* item)
 	assert(item != NULL);
 
 	// Insert item, also acquires ref
-	struct binary_node* new_root = tree_insert_item(tree->root, item);
+	binary_node_t* new_root = tree_insert_item(tree->root, item);
 	if (!new_root)
 	{
 		// TODO: Handle error
@@ -95,11 +95,11 @@ inline int Tree_Impl_insert(Tree* tree, PyObject* item)
    matches the key from the tree. It destroys the
    evicted node and udpates the root of the tree and
    the number of nodes. */
-inline int Tree_Impl_remove(Tree* tree, struct binary_node* node)
+inline int Tree_Impl_remove(Tree* tree, binary_node_t* node)
 {
 	// Remove from tree
-	struct binary_node* evicted = node;
-	struct binary_node* new_root = tree_remove(&evicted);
+	binary_node_t* evicted = node;
+	binary_node_t* new_root = tree_remove(&evicted);
 	if (!evicted)
 	{
 		// TODO: Handle error
@@ -199,7 +199,7 @@ Tree* Tree_copy(Tree* self)
 	Tree* new_tree = PyObject_New(Tree, &Tree_T);
 
 	// Clone tree structure
-	struct binary_node* new_tree_root = NULL;
+	binary_node_t* new_tree_root = NULL;
 	if (self->root)
 	{
 		new_tree_root = tree_clone_subtree(self->root);
@@ -226,7 +226,7 @@ PyObject* Tree_get(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 	}
 
 	// Find node using key
-	struct binary_node* node = tree_find(self->root, args[0]);
+	binary_node_t* node = tree_find(self->root, args[0]);
 	if (node)
 	{
 		// Return item found
@@ -258,7 +258,7 @@ PyObject* Tree_find(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 	}
 
 	// Find node using key
-	struct binary_node* node = tree_find(self->root, args[0]);
+	binary_node_t* node = tree_find(self->root, args[0]);
 	if (node)
 	{
 		// Return item found
@@ -331,7 +331,7 @@ PyObject* Tree_remove(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 	}
 
 	// Find node to remove
-	struct binary_node* node = tree_find(self->root, args[0]);
+	binary_node_t* node = tree_find(self->root, args[0]);
 	if (!node)
 	{
 		// Raise key error
@@ -357,7 +357,7 @@ PyObject* Tree_discard(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 	}
 
 	// Find node to remove
-	struct binary_node* node = tree_find(self->root, args[0]);
+	binary_node_t* node = tree_find(self->root, args[0]);
 	if (node && Tree_Impl_remove(self, node) < 0)
 	{
 		// Some error occured

@@ -8,7 +8,7 @@ typedef struct
 	PyObject_HEAD
 
 	/* Root node. */
-	struct binary_node* root;
+	binary_node_t* root;
 
 	/* Number of nodes */
 	size_t num_nodes;
@@ -23,7 +23,7 @@ typedef struct
 	PyObject_HEAD
 
 	/* Node pointed by iterator. */
-	struct binary_node* node;
+	binary_node_t* node;
 
 	/* Tree this iterator belongs too. */
 	Tree* owner;

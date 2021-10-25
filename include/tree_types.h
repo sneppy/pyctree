@@ -13,7 +13,7 @@ enum binary_node_color
    which contains a Python object. The node
    also has pointers to the previous and next
    nodes in sorting order. */
-struct binary_node
+typedef struct binary_node
 {
 	/* Ptr to the item inside the node. */
 	PyObject* item;
@@ -35,10 +35,10 @@ struct binary_node
 
 	/* Color of the node. */
 	enum binary_node_color color;
-};
+} binary_node_t;
 
 /* Type of the tree visit callback. */
-typedef void(*tree_visit_cb_t)(struct binary_node*, size_t, void*);
+typedef void(*tree_visit_cb_t)(binary_node_t*, size_t, void*);
 
 /* Type of the tree read-only visit callback. */
-typedef void(*tree_const_visit_t)(struct binary_node const*, size_t, void*);
+typedef void(*tree_const_visit_t)(binary_node_t const*, size_t, void*);
