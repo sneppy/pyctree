@@ -314,6 +314,39 @@ static void tree_repair_removed(binary_node_t* repl, binary_node_t* parent)
 	} while ((parent = repl->parent));
 }
 
+static void tree_find_impl(binary_node_t* root, PyObject* key, binary_node_t** node, binary_node_t** parent)
+{
+	assert(NODE != NULL);
+
+	binary_node_t* it = root;
+	binary_node_t* p = NULL;
+	while (it)
+	{
+		p = it;
+
+		if (PyObject_RichCompareBool(key, it->item, Py_LT))
+		{
+			it = it->left;
+		}
+		else if (PyObject_RichCompareBool(key, it->item, Py_GT))
+		{
+			it = it->right;
+		}
+		else
+		{
+			// Found node
+			if (node)
+				*node = it;
+
+			return;
+		}
+	}
+
+	if (parent)
+		// Return parent if not NULL
+		*parent = p;
+}
+
 static void tree_visit_df_impl(binary_node_t* root, size_t depth, tree_visit_cb_t visit_cb, void* payload)
 {
 	visit_cb(root, depth, payload);
@@ -371,11 +404,11 @@ size_t tree_size(binary_node_t* root)
 binary_node_t* tree_bisect_right(binary_node_t* root, PyObject* key)
 {
 	binary_node_t* it = root;
-	binary_node_t* p = NULL;
+	binary_node_t* parent = NULL;
 	while (it)
 	{
 		// Set parent
-		p = it;
+		parent = it;
 
 		// TODO: Handle errors
 		if (PyObject_RichCompareBool(key, it->item, Py_LT))
@@ -389,29 +422,14 @@ binary_node_t* tree_bisect_right(binary_node_t* root, PyObject* key)
 	}
 
 	// Return last visited node
-	return p;
+	return parent;
 }
 
 binary_node_t* tree_find(binary_node_t* root, PyObject* key)
 {
-	for (binary_node_t* it = root; it;)
-	{
-		// TODO: Handle errors
-		if (PyObject_RichCompareBool(key, it->item, Py_LT))
-		{
-			it = it->left;
-		}
-		else if (PyObject_RichCompareBool(key, it->item, Py_GT))
-		{
-			it = it->right;
-		}
-		else
-		{
-			return it;
-		}
-	}
-
-	return NULL;
+	binary_node_t* node = NULL;
+	tree_find_impl(root, key, &node, NULL);
+	return node;
 }
 
 binary_node_t* tree_insert(binary_node_t* root, binary_node_t* node)
@@ -434,6 +452,81 @@ binary_node_t* tree_insert(binary_node_t* root, binary_node_t* node)
 
 	// Return new root
 	return tree_root(node);
+}
+
+binary_node_t* tree_insert_unique(binary_node_t* root, binary_node_t** node)
+{
+	assert(node != NULL && *node != NULL);
+
+	// Find node in tree or get parent to insert
+	binary_node_t* found = NULL;
+	binary_node_t* parent = NULL;
+	tree_find_impl(root, (*node)->item, &found, &parent);
+
+	if (found)
+	{
+		// Node already exists, set node and current root
+		*node = found;
+		return root;
+	}
+
+	// If tree is empty, parent will be NULL
+	if (parent)
+	{
+		if (PyObject_RichCompareBool((*node)->item, parent->item, Py_LT))
+		{
+			binary_node_insert_left(parent, *node);
+		}
+		else
+		{
+			binary_node_insert_right(parent, *node);
+		}
+	}
+
+	// Repair tree after insertion
+	tree_repair(*node);
+
+	// Return new root
+	return tree_root(*node);
+}
+
+binary_node_t* tree_insert_replace(binary_node_t* root, binary_node_t** node)
+{
+	assert(node != NULL && *node != NULL);
+
+	// Find node in tree or get parent to insert
+	binary_node_t* found = NULL;
+	binary_node_t* parent = NULL;
+	tree_find_impl(root, (*node)->item, &found, &parent);
+
+	if (found)
+	{
+		// Node already exists, replace it
+		binary_node_swap(found, *node);
+
+		// Return the current root
+		return root;
+	}
+
+	// If tree is empty, parent is NULL
+	if (parent)
+	{
+		if (PyObject_RichCompareBool((*node)->item, parent->item, Py_LT))
+		{
+			binary_node_insert_left(parent, *node);
+		}
+		else
+		{
+			binary_node_insert_right(parent, *node);
+		}
+	}
+
+	// Repair tree after insertion
+	tree_repair(*node);
+
+	// Return new root
+	*node = NULL; // No node replaced
+	return tree_root(*node);
 }
 
 binary_node_t* tree_insert_item(binary_node_t* root, PyObject* item)

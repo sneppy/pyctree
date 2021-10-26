@@ -21,7 +21,7 @@ readme_path = Path(__file__).parent / "README.md"
 # Setup PyCTree package
 setup(
 	name="pyctree",
-	version="0.1.6",
+	version="0.1.7",
 	description=__doc__,
 	long_description=readme_path.read_text(),
 	author="Andrea Mecchia",

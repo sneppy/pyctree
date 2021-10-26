@@ -80,6 +80,23 @@ binary_node_t* tree_find(binary_node_t* root, PyObject* key);
    Returns a pointer to the new root of the tree. */
 binary_node_t* tree_insert(binary_node_t* root, binary_node_t* node);
 
+/* Insert a node in the tree. If a node with the
+   same key already exists, it does not insert
+   the node instead.
+
+   Returns the new root of the tree and the
+   inserted node or the existing node. */
+binary_node_t* tree_insert_unique(binary_node_t* root, binary_node_t** node);
+
+/* Insert a node in the tree. If a node with the
+   same key already exists, it replaces it with
+   the new node.
+
+   Returns the new root of the tree and the node
+   that was replaced, NULL if node was not
+   replaced. */
+binary_node_t* tree_insert_replace(binary_node_t* root, binary_node_t** node);
+
 /* Insert a new item in the tree. This function
    takes care of creating a new node and getting
    a reference to the python Object.
