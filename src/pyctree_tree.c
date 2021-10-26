@@ -9,7 +9,8 @@ static PyMethodDef Tree_Methods[] = {
 	DEFINE_PY_METHOD(Tree, update, PyCFunction, METH_FASTCALL, NULL),
 	DEFINE_PY_METHOD(Tree, remove, PyCFunction, METH_FASTCALL, NULL),
 	DEFINE_PY_METHOD(Tree, discard, PyCFunction, METH_FASTCALL, NULL),
-	DEFINE_PY_METHOD(Tree, clear, PyCFunction, METH_NOARGS, NULL)
+	DEFINE_PY_METHOD(Tree, clear, PyCFunction, METH_NOARGS, NULL),
+	END_PY_METHOD_LIST
 };
 
 /* Definition of the Python sequence API for Tree. */

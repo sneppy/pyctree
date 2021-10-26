@@ -1,7 +1,6 @@
 #include "pyctreemodule.h"
 
-/* @brief Called to initialize the Python module,
-   upon importing it in Python. */
+/* Called to initialize the Python module. */
 PyMODINIT_FUNC PyInit_pyctree()
 {
 	int status = 0;

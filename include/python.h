@@ -16,6 +16,9 @@
 	.ml_doc   = doc\
 }
 
+/* Marks the end of a PyMethodDef list. */
+#define END_PY_METHOD_LIST {NULL, NULL, 0, NULL}
+
 /* Increment refcount and return object ref. */
 #define RETURN_NEW_REF(obj) { Py_INCREF(obj); return obj; }
 
