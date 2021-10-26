@@ -4,6 +4,7 @@ PyCTree is a collection of tree-based containers for Python, written in C.
 """
 
 from distutils.core import Extension, setup
+from pathlib import Path
 
 # The PyCTree module definition
 pyctreemodule = Extension(
@@ -14,11 +15,15 @@ pyctreemodule = Extension(
 	include_dirs=["include/"]
 )
 
+# Get README content
+readme_path = Path(__file__).parent / "README.md"
+
 # Setup PyCTree package
 setup(
 	name="pyctree",
 	version="0.1.6",
 	description=__doc__,
+	long_description=readme_path.read_text(),
 	author="Andrea Mecchia",
 	author_email="andrea.mecchia@arm.com",
 	url="https://github.com/sneppy/pyctree",
