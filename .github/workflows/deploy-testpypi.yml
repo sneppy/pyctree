@@ -1,0 +1,33 @@
+name: Deploy TestPyPI
+on:
+  create:
+jobs:
+  deploy:
+    if: ${{startsWith(github.ref, 'refs/tags/v')}}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          ref: master
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+          architecture: x64
+      - name: Create virtual env
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          python --version
+          gcc --version
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip wheel twine
+      - name: Generate source archive
+        run: |
+          python ./setup.py sdist
+          ls -la dist/*
+      - name: Upload to TestPyPI
+        run: |
+          twine upload --repository testpypi -u __token__ -p ${{secrets.TESTPYPI_API_TOKEN}} dist/*
