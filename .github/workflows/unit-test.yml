@@ -3,6 +3,10 @@ on:
   push:
     branches:
       - master
+    paths:
+      - src/*
+      - include/*
+      - test/*
 jobs:
   test-pyctree-module:
     runs-on: ubuntu-latest
