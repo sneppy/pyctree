@@ -1,5 +1,5 @@
 from pytest import raises, main
-from pytree import Tree
+from pyctree import Tree
 
 def test_tree():
 	"""  """

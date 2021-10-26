@@ -1,4 +1,4 @@
-#include "pytree_tree.h"
+#include "pyctree_tree.h"
 
 /* The methods of the Tree type. */
 static PyMethodDef Tree_Methods[] = {
@@ -20,7 +20,7 @@ static PySequenceMethods Tree_SequenceMethods = {
 
 PyTypeObject Tree_T = {
 	PyVarObject_HEAD_INIT(NULL, 0)
-	.tp_name      = "pytree.Tree",
+	.tp_name      = "pyctree.Tree",
 	.tp_doc       = NULL,
 	.tp_basicsize = sizeof(Tree),
 	.tp_itemsize  = 0,
@@ -43,7 +43,7 @@ PyTypeObject Tree_T = {
 
 PyTypeObject TreeIterator_T = {
 	PyVarObject_HEAD_INIT(NULL, 0)
-	.tp_name      = "pytree.TreeIterator",
+	.tp_name      = "pyctree.TreeIterator",
 	.tp_doc       = NULL,
 	.tp_basicsize = sizeof(TreeIterator),
 	.tp_itemsize  = 0,

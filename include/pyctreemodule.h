@@ -1,15 +1,15 @@
 #pragma once
 
 #include "python.h"
-#include "pytree_tree.h"
+#include "pyctree_tree.h"
 
-#define PYTREE_MODULE
+#define PYCTREE_MODULE
 
 /* The name of the Python module. */
-static char const module_name[] = "pytree";
+static char const module_name[] = "pyctree";
 
 /* Definition for the Python module. */
-static struct PyModuleDef pytreemodule = {
+static struct PyModuleDef pyctreemodule = {
 	.m_base = PyModuleDef_HEAD_INIT,
 	.m_name = module_name,
 	.m_doc  = NULL,
@@ -17,6 +17,6 @@ static struct PyModuleDef pytreemodule = {
 };
 
 /* List of python types. */
-static struct python_type_def pytreetypes[] = {
+static struct python_type_def pyctreetypes[] = {
 	{.type = &Tree_T, .name = "Tree"}
 };

@@ -1,15 +1,15 @@
-#include "pytreemodule.h"
+#include "pyctreemodule.h"
 
 /* @brief Called to initialize the Python module,
    upon importing it in Python. */
-PyMODINIT_FUNC PyInit_pytree()
+PyMODINIT_FUNC PyInit_pyctree()
 {
 	int status = 0;
 
 	// Test all types are ready
-	for (int idx = 0; idx < ARRAY_COUNT(pytreetypes); ++idx)
+	for (int idx = 0; idx < ARRAY_COUNT(pyctreetypes); ++idx)
 	{
-		status = PyType_Ready(pytreetypes[idx].type);
+		status = PyType_Ready(pyctreetypes[idx].type);
 		if (status < 0)
 		{
 			// TODO: Print error
@@ -18,18 +18,18 @@ PyMODINIT_FUNC PyInit_pytree()
 	}
 
 	// Create the Python module
-	PyObject* module = PyModule_Create(&pytreemodule);
+	PyObject* module = PyModule_Create(&pyctreemodule);
 	if (!module)
 	{
 		// Failed to create module
 		return NULL;
 	}
 
-	for (int idx = 0; idx < ARRAY_COUNT(pytreetypes); ++idx)
+	for (int idx = 0; idx < ARRAY_COUNT(pyctreetypes); ++idx)
 	{
 		status = PyModule_AddObject(module,
-		                            pytreetypes[idx].name,
-									(PyObject*)pytreetypes[idx].type);
+		                            pyctreetypes[idx].name,
+									(PyObject*)pyctreetypes[idx].type);
 		if (status < 0)
 		{
 			Py_DECREF(module);
