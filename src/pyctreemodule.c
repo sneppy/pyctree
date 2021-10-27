@@ -6,7 +6,7 @@ PyMODINIT_FUNC PyInit_pyctree()
 	int status = 0;
 
 	// Test all types are ready
-	for (int idx = 0; idx < ARRAY_COUNT(pyctreetypes); ++idx)
+	for (uint32_t idx = 0; idx < ARRAY_COUNT(pyctreetypes); ++idx)
 	{
 		status = PyType_Ready(pyctreetypes[idx].type);
 		if (status < 0)
@@ -24,7 +24,7 @@ PyMODINIT_FUNC PyInit_pyctree()
 		return NULL;
 	}
 
-	for (int idx = 0; idx < ARRAY_COUNT(pyctreetypes); ++idx)
+	for (uint32_t idx = 0; idx < ARRAY_COUNT(pyctreetypes); ++idx)
 	{
 		status = PyModule_AddObject(module,
 		                            pyctreetypes[idx].name,

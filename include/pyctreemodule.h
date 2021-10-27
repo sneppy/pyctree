@@ -2,6 +2,7 @@
 
 #include "python.h"
 #include "pyctree_tree.h"
+#include "pyctree_sorted_set.h"
 
 #define PYCTREE_MODULE
 
@@ -18,5 +19,6 @@ static struct PyModuleDef pyctreemodule = {
 
 /* List of python types. */
 static struct python_type_def pyctreetypes[] = {
-	{.type = &Tree_T, .name = "Tree"}
+	{.type = &Tree_T, .name = "Tree"},
+	{.type = &SortedSet_T, .name = "SortedSet"}
 };

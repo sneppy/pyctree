@@ -1,7 +1,7 @@
 #include "pyctree_tree.h"
 
 /* The methods of the Tree type. */
-static PyMethodDef Tree_Methods[] = {
+static PyMethodDef Tree_methods[] = {
 	DEFINE_PY_METHOD(Tree, copy, PyCFunction, METH_NOARGS, NULL),
 	DEFINE_PY_METHOD(Tree, get, PyCFunction, METH_FASTCALL, NULL),
 	DEFINE_PY_METHOD(Tree, find, PyCFunction, METH_FASTCALL, NULL), // Deprecated
@@ -14,7 +14,7 @@ static PyMethodDef Tree_Methods[] = {
 };
 
 /* Definition of the Python sequence API for Tree. */
-static PySequenceMethods Tree_SequenceMethods = {
+static PySequenceMethods Tree_as_sequence = {
 	.sq_length   = (lenfunc)Tree_len,
 	.sq_contains = (objobjproc)Tree_contains,
 };
@@ -33,9 +33,9 @@ PyTypeObject Tree_T = {
 	.tp_str     = (reprfunc)Tree_str,
 
 	.tp_members = NULL,
-	.tp_methods = Tree_Methods,
+	.tp_methods = Tree_methods,
 
-	.tp_as_sequence = &Tree_SequenceMethods,
+	.tp_as_sequence = &Tree_as_sequence,
 	.tp_as_mapping  = NULL,
 
 	.tp_iter     = (getiterfunc)Tree_iter,
@@ -80,12 +80,8 @@ inline int Tree_Impl_insert(Tree* tree, PyObject* item)
 
 	// Insert item, also acquires ref
 	binary_node_t* new_root = tree_insert_item(tree->root, item);
-	if (!new_root)
-	{
-		// TODO: Handle error
-		return -1;
-	}
 
+	// Update tree
 	tree->root = new_root;
 	tree->num_nodes++;
 
@@ -137,7 +133,7 @@ int Tree_init(Tree* self, PyObject* args)
 
 	if (init_list)
 	{
-		// TODO: Support another tree as input
+		// TODO: Treat another tree as special input
 		PyObject* it = PyObject_GetIter(init_list);
 		if (!it)
 		{
@@ -147,7 +143,7 @@ int Tree_init(Tree* self, PyObject* args)
 			return -1;
 		}
 
-		// TODO: Initialize set with items from given iterable
+		// Initialize tree with items from given iterable
 		PyObject* item = NULL;
 		while ((item = PyIter_Next(it)))
 		{

@@ -11,6 +11,7 @@ pyctreemodule = Extension(
 	name="pyctree",
 	sources=["src/pyctreemodule.c",
 			 "src/pyctree_tree.c",
+			 "src/pyctree_sorted_set.c",
 			 "src/tree.c"],
 	include_dirs=["include/"]
 )
@@ -21,7 +22,7 @@ readme_path = Path(__file__).parent / "README.md"
 # Setup PyCTree package
 setup(
 	name="pyctree",
-	version="0.1.7",
+	version="0.1.8",
 	description=__doc__,
 	long_description=readme_path.read_text(),
 	author="Andrea Mecchia",

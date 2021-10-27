@@ -1,3 +1,4 @@
+from random import randint
 from pytest import raises, main
 from pyctree import Tree
 
@@ -72,8 +73,6 @@ def test_tree():
 
 def test_tree_stress():
 	"""  """
-
-	from random import randint
 
 	values = [randint(0, 255) for _ in range(0x1 << 12)]
 	t = Tree(values)
