@@ -6,13 +6,11 @@ PyCTree is a collection of tree-based containers for Python, written in C.
 
 ## Installation
 
-You can download and install the latest version from PyPI:
+You can download and install the latest version from TestPyPI:
 
 ```console
-$ pip install pyctree
+$ pip install --index-url https://test.pypi.org/simple/ pyctree
 ```
-
-> The package is being tested on latest Py3.6, Py3.7 and Py3.8. Unit tests fail on Py3.9 and it hasn't been tested on other distributions.
 
 ### Building from source
 
@@ -24,9 +22,17 @@ $ cd pyctree
 $ python setup.py install
 ```
 
+Note that you need to install the `python3.x-dev` package, e.g.:
+
+```console
+$ sudo apt-get install python3.6-dev
+```
+
 ## Usage
 
-PyCTree types are designed to be drop-in replacements for standard Python types; most methods have the same name and signature:
+PyCTree types are designed to be drop-in replacements for standard Python types.
+
+Most methods have the same name and signature, for example:
 
 ```python
 from pyctree import Tree
@@ -53,10 +59,4 @@ t.clear() # Remove all nodes
 print([*u]) # Unpack tree items
 ```
 
-Available types:
-
-- `pyctree.Tree` a self-balancing binary tree implementation (also works as a multi set/dict as it allows duplicate keys)
-- `pyctree.SortedSet` a tree-based set with sorted items (WIP)
-- `pyctree.SortedDict` a tree-based dict with sorted items (TODO)
-
-> To support user-defined types you need to overload both `__lt__` and `__gt__` operators.
+For more informations read the [docs](https://sneppy.github.io/pyctree/).

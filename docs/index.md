@@ -1,17 +1,29 @@
-# Welcome to MkDocs
+# PyCTree
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+[![Unit Test](https://github.com/sneppy/pyctree/actions/workflows/unit-test.yml/badge.svg)](https://github.com/sneppy/pyctree/actions/workflows/unit-test.yml)
 
-## Commands
+PyCTree is a collection of tree-based containers for Python, written in C.
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+## Installation
 
-## Project layout
+You can download and install the latest version from TestPyPI:
 
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+```console
+$ pip install --index-url https://test.pypi.org/simple/ pyctree
+```
+
+### Building from source
+
+Alternatively, you can clone this repository and manually build the module:
+
+```console
+$ git clone https://github.com/sneppy/pyctree.git
+$ cd pyctree
+$ python setup.py install
+```
+
+Note that you need to install the `python3.x-dev` package, e.g.:
+
+```console
+$ sudo apt-get install python3.6-dev
+```

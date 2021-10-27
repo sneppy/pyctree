@@ -1,5 +1,23 @@
 site_name: PyCTree
 site_url: https://sneppy.github.io/pyctree/
+nav:
+  - Welcome page: index.md
+  - API reference: api.md
 theme:
-  name: rtd-dropdown
-  highlightjs: true
+  name: material
+  font:
+    text: Fira Sans
+    code: Fira Code
+  palette:
+    primary: teal
+    accent: yellow
+  repo_url: https://github.com/sneppy/pyctree
+  repo_name: sneppy/pyctree
+markdown_extensions:
+  - abbr
+  - admonition
+  - footnotes
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.snippets
