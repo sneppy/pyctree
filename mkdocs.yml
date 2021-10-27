@@ -1,0 +1,5 @@
+site_name: PyCTree
+site_url: https://sneppy.github.io/pyctree/
+theme:
+  name: rtd-dropdown
+  highlightjs: true

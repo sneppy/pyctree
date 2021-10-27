@@ -56,7 +56,7 @@ print([*u]) # Unpack tree items
 Available types:
 
 - `pyctree.Tree` a self-balancing binary tree implementation (also works as a multi set/dict as it allows duplicate keys)
-- `pyctree.SortedSet` a tree-based set with sorted items (TODO)
+- `pyctree.SortedSet` a tree-based set with sorted items (WIP)
 - `pyctree.SortedDict` a tree-based dict with sorted items (TODO)
 
 > To support user-defined types you need to overload both `__lt__` and `__gt__` operators.

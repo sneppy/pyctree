@@ -1,0 +1,6 @@
+# Testing
+pytest
+# Docs
+-r requirements-docs.txt
+# Upload to PyPI
+twine
