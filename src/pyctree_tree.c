@@ -5,6 +5,8 @@ static PyMethodDef Tree_methods[] = {
 	DEFINE_PY_METHOD(Tree, copy, PyCFunction, METH_NOARGS, NULL),
 	DEFINE_PY_METHOD(Tree, get, PyCFunction, METH_FASTCALL, NULL),
 	DEFINE_PY_METHOD(Tree, find, PyCFunction, METH_FASTCALL, NULL), // Deprecated
+	DEFINE_PY_METHOD(Tree, left_bound, PyCFunction, METH_FASTCALL, NULL),
+	DEFINE_PY_METHOD(Tree, right_bound, PyCFunction, METH_FASTCALL, NULL),
 	DEFINE_PY_METHOD(Tree, add, PyCFunction, METH_FASTCALL, NULL),
 	DEFINE_PY_METHOD(Tree, update, PyCFunction, METH_FASTCALL, NULL),
 	DEFINE_PY_METHOD(Tree, remove, PyCFunction, METH_FASTCALL, NULL),
@@ -256,6 +258,46 @@ PyObject* Tree_find(Tree* self, PyObject* const* args, Py_ssize_t num_args)
 
 	// Find node using key
 	binary_node_t* node = tree_find(self->root, args[0]);
+	if (node)
+	{
+		// Return item found
+		RETURN_NEW_REF(node->item);
+	}
+
+	// Return None object
+	RETURN_NONE
+}
+
+PyObject* Tree_left_bound(Tree* self, PyObject* const* args, Py_ssize_t num_args)
+{
+	if (num_args != 1)
+	{
+		INVALID_NUM_ARGS_ONE(find, num_args);
+		return NULL;
+	}
+
+	// Find node using key
+	binary_node_t* node = tree_left_bound(self->root, args[0]);
+	if (node)
+	{
+		// Return item found
+		RETURN_NEW_REF(node->item);
+	}
+
+	// Return None object
+	RETURN_NONE
+}
+
+PyObject* Tree_right_bound(Tree* self, PyObject* const* args, Py_ssize_t num_args)
+{
+	if (num_args != 1)
+	{
+		INVALID_NUM_ARGS_ONE(find, num_args);
+		return NULL;
+	}
+
+	// Find node using key
+	binary_node_t* node = tree_right_bound(self->root, args[0]);
 	if (node)
 	{
 		// Return item found

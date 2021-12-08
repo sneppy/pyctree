@@ -66,8 +66,21 @@ size_t tree_size(binary_node_t* root);
 
 /* Returns the last node along the path given
    by the key. When an item matches the key
+   it moves to the left child. */
+binary_node_t* tree_bisect_left(binary_node_t* root, PyObject* key);
+
+/* Returns the last node along the path given
+   by the key. When an item matches the key
    it moves to the right child. */
 binary_node_t* tree_bisect_right(binary_node_t* root, PyObject* key);
+
+/* Returns a pointer to a node such that all
+   previous nodes preceeds the given key. */
+binary_node_t* tree_left_bound(binary_node_t* root, PyObject* key);
+
+/* Returns a pointer to a node such that all next
+   nodes succeeds the given key. */
+binary_node_t* tree_right_bound(binary_node_t* root, PyObject* key);
 
 /* Returns a pointer to the first node that
    matches the key, or NULL if no such node

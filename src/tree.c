@@ -401,6 +401,30 @@ size_t tree_size(binary_node_t* root)
    return size;
 }
 
+binary_node_t* tree_bisect_left(binary_node_t* root, PyObject* key)
+{
+	binary_node_t* it = root;
+	binary_node_t* parent = NULL;
+	while (it)
+	{
+		// Set parent
+		parent = it;
+
+		// TODO: Handle errors
+		if (PyObject_RichCompareBool(key, it->item, Py_GT))
+		{
+			it = it->right;
+		}
+		else
+		{
+			it = it->left;
+		}
+	}
+
+	// Return last visited node
+	return parent;
+}
+
 binary_node_t* tree_bisect_right(binary_node_t* root, PyObject* key)
 {
 	binary_node_t* it = root;
@@ -429,6 +453,38 @@ binary_node_t* tree_find(binary_node_t* root, PyObject* key)
 {
 	binary_node_t* node = NULL;
 	tree_find_impl(root, key, &node, NULL);
+	return node;
+}
+
+binary_node_t* tree_left_bound(binary_node_t* root, PyObject* key)
+{
+	if (!root)
+		// Tree is empty
+		return NULL;
+
+	binary_node_t* node = tree_bisect_left(root, key);
+	if (PyObject_RichCompareBool(key, node->item, Py_GT))
+	{
+		// Get next
+		node = node->next;
+	}
+
+	return node;
+}
+
+binary_node_t* tree_right_bound(binary_node_t* root, PyObject* key)
+{
+	if (!root)
+		// Tree is empty
+		return NULL;
+
+	binary_node_t* node = tree_bisect_right(root, key);
+	if (PyObject_RichCompareBool(key, node->item, Py_LT))
+	{
+		// Get previous
+		node = node->prev;
+	}
+
 	return node;
 }
 

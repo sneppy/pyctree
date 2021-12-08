@@ -60,6 +60,14 @@ PyObject* Tree_get(Tree* self, PyObject* const* args, Py_ssize_t num_args);
    given key. */
 PyObject* Tree_find(Tree* self, PyObject* const* args, Py_ssize_t num_args);
 
+/* Returns an item such that all previous items
+   are less than the given key. */
+PyObject* Tree_left_bound(Tree* self, PyObject* const* args, Py_ssize_t num_args);
+
+/* Returns an item such that all next items are
+   greater than the given key. */
+PyObject* Tree_right_bound(Tree* self, PyObject* const* args, Py_ssize_t num_args);
+
 /* Insert a new item in the tree. The tree may
    contain multiple items that match the same
    key. */
