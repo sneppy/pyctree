@@ -57,6 +57,17 @@ Removes all items from the tree.
 
 Creates a shallow copy of the tree.
 
+### `#!python left_bound(key)`
+
+Returns the item that partitions the tree in such a way that all previous items are smaller and all next items are
+larger or equal. The item, if it exists, is unique (though it may depend on the order in which the items were inserted
+in the tree, if there are multiple items with the same key).
+
+### `#!python right_bound(key)`
+
+Returns the item that partitions the tree in such a way that all previous items are smaller or equal and all next items
+are larger. See `#!python left_bound(key)` for additional info.
+
 SortedSet
 ---------
 
