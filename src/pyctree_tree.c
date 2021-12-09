@@ -272,7 +272,7 @@ PyObject* Tree_left_bound(Tree* self, PyObject* const* args, Py_ssize_t num_args
 {
 	if (num_args != 1)
 	{
-		INVALID_NUM_ARGS_ONE(find, num_args);
+		INVALID_NUM_ARGS_ONE(left_bound, num_args);
 		return NULL;
 	}
 
@@ -292,7 +292,7 @@ PyObject* Tree_right_bound(Tree* self, PyObject* const* args, Py_ssize_t num_arg
 {
 	if (num_args != 1)
 	{
-		INVALID_NUM_ARGS_ONE(find, num_args);
+		INVALID_NUM_ARGS_ONE(right_bound, num_args);
 		return NULL;
 	}
 
